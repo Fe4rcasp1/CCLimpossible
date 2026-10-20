@@ -46,6 +46,9 @@
                 <router-link class="nav__tab" to="/">
                     <span class="type-label-lg">List</span>
                 </router-link>
+                <router-link class="nav__tab" to="/platformer">
+                    <span class="type-label-lg">Impossible Platformer</span>
+                </router-link>
                 <router-link class="nav__tab" to="/leaderboard">
                     <span class="type-label-lg">Leaderboard</span>
                 </router-link>
@@ -76,6 +79,6 @@
                 </div>
             </nav>
         </header>
-        <router-view :class="{ dark: store.dark }"></router-view>
+        <router-view :key="$route.path" :class="{ dark: store.dark }"></router-view>
     </body>
 </html>
