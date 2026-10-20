@@ -16,12 +16,15 @@ const roleIconMap = {
 
 export default {
     components: { Spinner, LevelAuthors },
+    props: { listFile: { type: String, default: "_list.json" }, platformer: { type: Boolean, default: false } },
     template: `
         <main v-if="loading">
             <Spinner></Spinner>
         </main>
         <main v-else class="page-list">
             <div class="list-container">
+                <h2 class="impossible-list-title">{{ platformer ? 'Impossible Platformer List' : 'Impossible Challenge List' }}</h2>
+                <p v-if="list && !list.length" class="impossible-empty-list">No impossible platformer levels have been added yet.</p>
                 <table class="list" v-if="list">
                     <tr v-for="([level, err], i) in list">
                         <td class="rank">
@@ -40,7 +43,8 @@ export default {
                 <div class="level" v-if="level">
                     <h1>{{ level.name }}</h1>
                     <LevelAuthors :author="level.author" :creators="level.creators" :verifier="level.verifier"></LevelAuthors>
-                    <iframe class="video" id="videoframe" :src="video" frameborder="0"></iframe>
+                    <iframe v-if="level.verification" class="video" id="videoframe" :src="video" frameborder="0"></iframe>
+                    <p v-else class="type-label-md">No verification video available yet.</p>
                     <ul class="stats">
                         <li>
                             <div class="type-title-sm">Points when completed</div>
@@ -77,7 +81,7 @@ export default {
                     </table>
                 </div>
                 <div v-else class="level" style="height: 100%; justify-content: center; align-items: center;">
-                    <p>(ノಠ益ಠ)ノ彡┻━┻</p>
+                    <p>{{ list && !list.length ? "Impossible platformer levels will appear here once added." : "Select a level to view its details." }}</p>
                 </div>
             </div>
             <div class="meta-container">
@@ -85,9 +89,7 @@ export default {
                     <div class="errors" v-show="errors.length > 0">
                         <p class="error" v-for="error of errors">{{ error }}</p>
                     </div>
-                    <div class="og">
-                        <p class="type-label-md">Website layout made by <a href="https://tsl.pages.dev/" target="_blank">TheShittyList</a></p>
-                    </div>
+
                     <template v-if="editors">
                         <h3>List Editors</h3>
                         <ol class="editors">
@@ -117,9 +119,10 @@ export default {
     }),
     computed: {
         level() {
-            return this.list[this.selected][0];
+            return this.list?.[this.selected]?.[0] || null;
         },
         video() {
+            if (!this.level) return "";
             if (!this.level.showcase) {
                 return embed(this.level.verification);
             }
@@ -133,7 +136,7 @@ export default {
     },
     async mounted() {
         // Hide loading spinner
-        this.list = await fetchList();
+        this.list = await fetchList(this.listFile);
         this.editors = await fetchEditors();
 
         // Error handling
