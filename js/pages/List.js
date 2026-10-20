@@ -2,6 +2,7 @@ import { store } from "../main.js";
 import { embed } from "../util.js";
 import { score } from "../score.js";
 import { fetchEditors, fetchList } from "../content.js";
+import { getImpossibleRating } from "../ratings.js";
 
 import Spinner from "../components/Spinner.js";
 import LevelAuthors from "../components/List/LevelAuthors.js";
@@ -32,7 +33,7 @@ export default {
                             <p v-else class="type-label-lg">Legacy</p>
                         </td>
                         <td class="level" :class="{ 'active': selected == i, 'error': !level }">
-                            <button @click="selected = i">
+                            <button @click="selected = i" :style="selected === i && level ? { backgroundColor: ratingColor(i), color: ratingTextColor(i) } : {}">
                                 <span class="type-label-lg">{{ level?.name || \`Error (\${err}.json)\` }}</span>
                             </button>
                         </td>
@@ -162,5 +163,7 @@ export default {
     methods: {
         embed,
         score,
+        ratingColor(index) { return ({ rate: "#808080", featured: "#e4c526", epic: "#ef922d", legendary: "#a855f7", mythic: "#08bfd4" })[getImpossibleRating(index, this.platformer)] || "#244f88"; },
+        ratingTextColor(index) { return ["featured", "epic", "mythic"].includes(getImpossibleRating(index, this.platformer)) ? "#171c27" : "#fff"; },
     },
 };
